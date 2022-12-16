@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redmine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redmine
+  template:
+    metadata:
+      labels:
+        app: redmine
+    spec:
+      containers:
+        - name: redmine
+          image: redmine:4.1.1
+          imagePullPolicy: "IfNotPresent"
+          env:
+            - name: REDMINE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-pass
+                  key: PASS
+            - name: REDMINE_SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: redmine-pass
+                  key: PASS
+            - name: REDMINE_DB_POSTGRES
+              value: "database"
+            - name: REDMINE_DB_USERNAME
+              value: "admin"
+            - name: REDMINE_DB_DATABASE
+              value: "postgresdb"
+          ports:
+            - containerPort: 3000
+  strategy:
+    type: Recreate
